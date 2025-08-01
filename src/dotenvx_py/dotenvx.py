@@ -122,6 +122,8 @@ def read_profile(env_file: Optional[StrPath] = None) -> Optional[str]:
     file_name = env_file
     if "/" in env_file:
         file_name = env_file.split("/")[-1]
+    elif "\\" in env_file:
+        file_name = env_file.split("\\")[-1]
     if file_name.startswith(".env."):
         return file_name[5:]
     return None
