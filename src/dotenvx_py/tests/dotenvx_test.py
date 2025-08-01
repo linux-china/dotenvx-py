@@ -1,10 +1,11 @@
 import os
 from pathlib import Path
 
+from dotenvx_py import load_dotenv
+
 from dotenvx_py.dotenvx import (
     encrypt_item,
     decrypt_item,
-    load_dotenv,
     read_pk,
     read_sk,
     dotenv_values,
