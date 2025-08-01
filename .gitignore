@@ -212,7 +212,6 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
 .venv
 env/
 venv/
@@ -264,3 +263,4 @@ pyrightconfig.json
 # End of https://www.toptal.com/developers/gitignore/api/python,jetbrains+all
 
 .env.keys
+.uv.lock
