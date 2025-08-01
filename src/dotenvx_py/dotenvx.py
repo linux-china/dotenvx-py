@@ -83,7 +83,7 @@ def dotenv_values(
     encoding: Optional[str] = "utf-8",
 ) -> dict[str, Optional[str]]:
     profile = read_profile(dotenv_path)
-    sk_hex = read_sk(profile)
+    sk_hex = read_private_key(profile)
     entries = dotenv.dotenv_values(dotenv_path, stream, verbose, interpolate, encoding)
     for key, value in entries.items():
         if value.startswith("encrypted:"):
@@ -91,19 +91,31 @@ def dotenv_values(
     return entries
 
 
-def encrypt_item(pk_hex: str, text: str) -> str:
+def encrypt_item(public_key_hex: str, text: str) -> str:
+    """
+    encrypt item by public key and text.
+    :param public_key_hex: public key hex
+    :param text: text to encrypt
+    :return: encrypted text with base64 encoded and prefix "encrypted:
+    """
     pk = PublicKey.from_hex(
         "secp256k1",
-        pk_hex,
+        public_key_hex,
     )
     encrypted = encrypt(pk.to_bytes(True), text.encode("utf-8"))
     return "encrypted:" + base64.b64encode(encrypted).decode("utf-8")
 
 
-def decrypt_item(sk_hex: str, encrypted_text: str) -> str:
+def decrypt_item(private_key_hex: str, encrypted_text: str) -> str:
+    """
+    decrypt item by private key and encrypted text.
+    :param private_key_hex: private key hex
+    :param encrypted_text: encrypted text with base64 encoded
+    :return:
+    """
     sk = PrivateKey.from_hex(
         "secp256k1",
-        sk_hex,
+        private_key_hex,
     )
     if encrypted_text.startswith("encrypted:"):
         encrypted_text = encrypted_text.replace("encrypted:", "")
@@ -113,23 +125,32 @@ def decrypt_item(sk_hex: str, encrypted_text: str) -> str:
 
 
 def read_profile(env_file: Optional[StrPath] = None) -> Optional[str]:
-    if env_file is None:
-        return None
+    """
+    read profile from environment variables or .env file name.
+    :param env_file: env file path
+    :return: profile name
+    """
     env_key_names = ["NODE_ENV", "RUN_ENV", "APP_ENV", "SPRING_PROFILES_ACTIVE"]
     for env_key_name in env_key_names:
         if env_key_name in os.environ:
             return os.environ[env_key_name]
-    file_name = env_file
-    if "/" in env_file:
-        file_name = env_file.split("/")[-1]
-    elif "\\" in env_file:
-        file_name = env_file.split("\\")[-1]
-    if file_name.startswith(".env."):
-        return file_name[5:]
+    if env_file:
+        file_name = env_file
+        if "/" in env_file:
+            file_name = env_file.split("/")[-1]
+        elif "\\" in env_file:
+            file_name = env_file.split("\\")[-1]
+        if file_name.startswith(".env."):
+            return file_name[5:]
     return None
 
 
-def read_pk(env_file: str) -> Optional[str]:
+def read_public_key(env_file: str) -> Optional[str]:
+    """
+    read public key from .env file.
+    :param env_file: env file path
+    :return: public key
+    """
     file_text = Path(env_file).read_text()
     for line in file_text.splitlines():
         if line.startswith("DOTENV_PUBLIC_KEY"):
@@ -137,7 +158,12 @@ def read_pk(env_file: str) -> Optional[str]:
     return None
 
 
-def read_sk(profile: Optional[StrPath] = None) -> Optional[str]:
+def read_private_key(profile: Optional[StrPath] = None) -> Optional[str]:
+    """
+    read private key by profile name, and value is from environment or .env.keys file.
+    :param profile: profile name
+    :return: private key
+    """
     if profile is None:
         sk_key_name = "DOTENV_PRIVATE_KEY"
     else:
@@ -150,11 +176,16 @@ def read_sk(profile: Optional[StrPath] = None) -> Optional[str]:
         return os.environ.get(sk_key_name)
 
 
-def find_env_keys_file(path: Path) -> Optional[Path]:
-    if (path / env_keys_file_name).exists():
-        return path / env_keys_file_name
+def find_env_keys_file(current_dir: Path) -> Optional[Path]:
+    """
+    find .env.keys file in give path and its parent directories.
+    :param current_dir: current directory to start searching
+    :return: .env.keys file path
+    """
+    if (current_dir / env_keys_file_name).exists():
+        return current_dir / env_keys_file_name
     # find .env.keys file in current directory or parent directories up to root
-    for parent in path.parents:
+    for parent in current_dir.parents:
         env_keys_file = parent / env_keys_file_name
         if env_keys_file.exists():
             return env_keys_file
