@@ -35,9 +35,12 @@ class DotEnvx:
         self.encoding: Optional[str] = encoding
         self.interpolate: bool = interpolate
         self.override: bool = override
+        self.entries: Optional[dict[str, Optional[str]]] = None
 
     def dict(self) -> Dict[str, Optional[str]]:
-        return dotenv_values(self.dotenv_path, self.stream, self.encoding)
+        if self.entries is None:
+            self.entries = dotenv_values(self.dotenv_path, self.stream, self.encoding)
+        return self.entries
 
     def set_as_environment_variables(self) -> bool:
         if not self.dict():
