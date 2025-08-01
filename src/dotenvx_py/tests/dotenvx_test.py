@@ -6,8 +6,8 @@ from dotenvx_py import load_dotenv
 from dotenvx_py.dotenvx import (
     encrypt_item,
     decrypt_item,
-    read_pk,
-    read_sk,
+    read_public_key,
+    read_private_key,
     dotenv_values,
 )
 
@@ -32,12 +32,12 @@ def test_load_values():
 
 
 def test_read_pk():
-    pk = read_pk(".env")
+    pk = read_public_key(".env")
     print(pk)
 
 
 def test_read_sk():
-    pk = read_sk(None)
+    pk = read_private_key(None)
     print(pk)
     current_dir = Path.cwd()
     for parent in current_dir.parents:
