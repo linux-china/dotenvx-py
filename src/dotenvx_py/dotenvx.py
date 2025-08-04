@@ -72,6 +72,7 @@ def load_dotenv(
         verbose=verbose,
         interpolate=interpolate,
         encoding=encoding,
+        override=True,
     ).set_as_environment_variables()
 
 
