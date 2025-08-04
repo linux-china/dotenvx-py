@@ -5,7 +5,20 @@ dotenvx for Python, and compatible with [python-dotenv](https://pypi.org/project
 
 # Get started
 
-`pip install dotenvx-py` or `uv add dotenvx-py`.
+> dotenvx-py is not available on PyPI, and you need to install it from source.
+
+
+Run `uv add "dotenvx-py @ https://github.com/linux-china/dotenvx-py.git"`
+or add the following to your `pyproject.toml` file:
+
+```toml
+dependencies = [
+    "dotenvx-py",
+]
+
+[tool.uv.sources]
+dotenvx-py = { git = "https://github.com/linux-china/dotenvx-py.git" }
+```
 
 Load dotenv file by calling `load_dotenv()` function.
 
