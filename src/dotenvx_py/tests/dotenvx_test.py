@@ -9,6 +9,7 @@ from dotenvx_py.dotenvx import (
     read_public_key,
     read_private_key,
     dotenv_values,
+    find_global_key_pairs,
 )
 
 
@@ -42,3 +43,8 @@ def test_read_sk():
     current_dir = Path.cwd()
     for parent in current_dir.parents:
         print(parent)
+
+
+def test_global_key_paris():
+    key_paris = find_global_key_pairs()
+    print(key_paris)
