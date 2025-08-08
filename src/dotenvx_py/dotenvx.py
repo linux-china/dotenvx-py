@@ -1,4 +1,5 @@
 import base64
+import json
 from typing import (
     Optional,
     Union,
@@ -83,12 +84,22 @@ def dotenv_values(
     interpolate: bool = True,
     encoding: Optional[str] = "utf-8",
 ) -> dict[str, Optional[str]]:
-    profile = read_profile(dotenv_path)
-    sk_hex = read_private_key(profile)
     entries = dotenv.dotenv_values(dotenv_path, stream, verbose, interpolate, encoding)
+    public_key: str = None
+    private_key: str = None
+    for key, value in entries.items():
+        if key.startswith("DOTENV_PUBLIC_KEY"):
+            public_key = value
+    if public_key:
+        store = find_global_key_pairs()
+        if public_key in store:
+            private_key = store[public_key]
+    if private_key is None:
+        profile = read_profile(dotenv_path)
+        private_key = read_private_key(profile)
     for key, value in entries.items():
         if value.startswith("encrypted:"):
-            entries[key] = decrypt_item(sk_hex, value)
+            entries[key] = decrypt_item(private_key, value)
     return entries
 
 
@@ -191,3 +202,17 @@ def find_env_keys_file(current_dir: Path) -> Optional[Path]:
         if env_keys_file.exists():
             return env_keys_file
     return None
+
+
+def find_global_key_pairs() -> dict[str, str]:
+    # read $HOME/.dotenvx/.env.keys.json file
+    home_dir = Path.home()
+    env_keys_file = home_dir / ".dotenvx" / ".env.keys.json"
+    if env_keys_file.exists():
+        json_text = env_keys_file.read_text()
+        store: dict[str, dict[str, str]] = json.loads(json_text)
+        pairs = {}
+        for public_key, key_pair in store.items():
+            pairs[public_key] = key_pair["private_key"]
+        return pairs
+    return {}
