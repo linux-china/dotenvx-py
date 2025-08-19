@@ -210,7 +210,9 @@ def find_global_key_pairs() -> dict[str, str]:
     env_keys_file = home_dir / ".dotenvx" / ".env.keys.json"
     if env_keys_file.exists():
         json_text = env_keys_file.read_text()
-        store: dict[str, dict[str, str]] = json.loads(json_text)
+        store: dict = json.loads(json_text)
+        if "version" in store and "keys" in store:
+            store = store["keys"]
         pairs = {}
         for public_key, key_pair in store.items():
             pairs[public_key] = key_pair["private_key"]
