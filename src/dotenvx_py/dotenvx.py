@@ -5,6 +5,7 @@ from typing import (
     Union,
     IO,
     Dict,
+    Any,
 )
 import os
 from pathlib import Path
@@ -101,6 +102,23 @@ def dotenv_values(
         if value.startswith("encrypted:"):
             entries[key] = decrypt_item(private_key, value)
     return entries
+
+
+def decrypt_entries(
+    env_data: dict[str, Any], profile: Optional[str] = None
+) -> dict[str, Any]:
+    if profile:
+        public_key = env_data[f"DOTENV_PUBLIC_KEY_{profile.upper()}"]
+    else:
+        public_key = env_data["DOTENV_PUBLIC_KEY"]
+    private_key = find_private_key(public_key, profile)
+    if private_key:
+        # iterator env_date and decrypt value prefix with encrypted:
+        for key, value in env_data.items():
+            if isinstance(value, str) and value.startswith("encrypted:"):
+                decrypted_value = decrypt_item(private_key, value)
+                env_data[key] = decrypted_value
+    return env_data
 
 
 def encrypt_item(public_key_hex: str, text: str) -> str:
