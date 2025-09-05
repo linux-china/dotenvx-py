@@ -170,6 +170,19 @@ def read_public_key(env_file: str) -> Optional[str]:
     return None
 
 
+def find_private_key(
+    public_key: Optional[str] = None, profile_name: Optional[str] = None
+) -> Optional[str]:
+    private_key: str = None
+    if public_key:
+        store = find_global_key_pairs()
+        if public_key in store:
+            private_key = store[public_key]
+    if private_key is None:
+        private_key = read_private_key(profile_name)
+    return private_key
+
+
 def read_private_key(profile: Optional[StrPath] = None) -> Optional[str]:
     """
     read private key by profile name, and value is from environment or .env.keys file.
