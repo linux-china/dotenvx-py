@@ -8,7 +8,7 @@ dotenvx for Python, and compatible with [python-dotenv](https://pypi.org/project
 > dotenvx-py is not available on PyPI, and you need to install it from source.
 
 
-Run `uv add "dotenvx-py @ https://github.com/linux-china/dotenvx-py.git"`
+Run `uv add "dotenvx-py@https://github.com/linux-china/dotenvx-py.git"`
 or add the following to your `pyproject.toml` file:
 
 ```toml
