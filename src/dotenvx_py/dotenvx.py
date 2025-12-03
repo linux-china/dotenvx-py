@@ -94,7 +94,7 @@ def dotenv_values(
     if public_key:
         store = find_global_key_pairs()
         if public_key in store:
-            private_key = store[public_key]
+            private_key = trim_private_key(store[public_key])
     if private_key is None:
         profile = read_profile(dotenv_path)
         private_key = read_private_key(profile)
@@ -195,7 +195,7 @@ def find_private_key(
     if public_key:
         store = find_global_key_pairs()
         if public_key in store:
-            private_key = store[public_key]
+            private_key = trim_private_key(store[public_key])
     if private_key is None:
         private_key = read_private_key(profile_name)
     return private_key
@@ -214,9 +214,15 @@ def read_private_key(profile: Optional[StrPath] = None) -> Optional[str]:
     env_key_file = find_env_keys_file(Path.cwd())
     entries = dotenv.dotenv_values(env_key_file)
     if sk_key_name in entries:
-        return entries[sk_key_name]
+        return trim_private_key(entries[sk_key_name])
     else:
-        return os.environ.get(sk_key_name)
+        return trim_private_key(os.environ.get(sk_key_name))
+
+
+def trim_private_key(private_key: str) -> str:
+    if private_key and "{" in private_key:
+        return private_key[0 : private_key.index("{")]
+    return private_key
 
 
 def find_env_keys_file(current_dir: Path) -> Optional[Path]:
